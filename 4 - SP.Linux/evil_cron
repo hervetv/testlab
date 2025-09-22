@@ -1,0 +1,28 @@
+# Dossier de test
+*/15 * * * * /bin/mkdir -p /tmp/avtest
+ 
+# 1) Écrit le fichier EICAR (détection sur écriture)
+*/15 * * * * /usr/bin/printf '%s' 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > /tmp/avtest/eicar.com 2>>/tmp/avtest/avtest.log
+ 
+# 2) Lecture du fichier (détection on-access / on-read)
+*/15 * * * * /bin/cat /tmp/avtest/eicar.com >/dev/null 2>>/tmp/avtest/avtest.log
+ 
+# 3) Mise en quarantaine probable : si le fichier existe encore, créer des variantes
+#    a) Copie sous divers noms/extensions
+*/20 * * * * [ -f /tmp/avtest/eicar.com ] && /bin/cp -f /tmp/avtest/eicar.com /tmp/avtest/eicar.txt 2>>/tmp/avtest/avtest.log
+*/20 * * * * [ -f /tmp/avtest/eicar.com ] && /bin/cp -f /tmp/avtest/eicar.com /tmp/avtest/eicar.bin 2>>/tmp/avtest/avtest.log
+ 
+#    b) Archives (détection dans ZIP et ZIP imbriqué)
+*/20 * * * * [ -f /tmp/avtest/eicar.com ] && /usr/bin/zip -j -q /tmp/avtest/eicar.zip /tmp/avtest/eicar.com 2>>/tmp/avtest/avtest.log
+*/25 * * * * [ -f /tmp/avtest/eicar.zip ] && /usr/bin/zip -j -q /tmp/avtest/eicar2.zip /tmp/avtest/eicar.zip 2>>/tmp/avtest/avtest.log
+ 
+# 4) Variante encodée/décodée (détection à la création après décodage)
+*/30 * * * * /usr/bin/printf '%s' 'WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNBTkRBUkQtQU5USVZJUlVTLVRFU1QtRklMRSEkSCtIKg==' | /usr/bin/base64 -d > /tmp/avtest/eicar_decoded.com 2>>/tmp/avtest/avtest.log
+ 
+# 5) Tentative d'exécution (devrait échouer mais peut déclencher une analyse)
+*/30 * * * * /bin/chmod +x /tmp/avtest/eicar.com 2>>/tmp/avtest/avtest.log; /tmp/avtest/eicar.com >/dev/null 2>>/tmp/avtest/avtest.log || true
+ 
+# 6) Test au démarrage (détection early boot si l’AV scanne au boot)
+@reboot /usr/bin/printf '%s' 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > /tmp/avtest/boot_eicar.com 2>>/tmp/avtest/avtest.log
+@reboot /usr/bin/zip -j -q
+ 
